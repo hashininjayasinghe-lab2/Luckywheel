@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎁 Your Lucky Spin! 🎁</title>
+    <style>
+        /* General Styles for Mobile View */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            text-align: center;
+        }
+
+        /* Slideshow Styling */
+        #slideshow-container {
+            width: 100%;
+            height: 200px; /* Adjust height as needed */
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .slide {
+            width: 100%;
+            height: 100%;
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            transition: opacity 1s ease-in-out;
+        }
+
+        .slide.active {
+            display: block;
+            opacity: 1;
+        }
+
+        .slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Ensures images cover the area without distortion */
+        }
+
+        /* Wheel/Selector Styling */
+        #wheel-container {
+            padding: 20px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #333;
+            margin-top: 0;
+        }
+
+        /* Note: We now use input type="submit" for the form to work */
+        .option-button {
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 18px;
+            margin: 10px;
+            cursor: pointer;
+            border-radius: 8px;
+            width: 80%; /* For better mobile tap area */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+
+        .option-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+        }
+        
+        /* Specific Color Styles */
+        #btn-red { background-color: #ff4757; }
+        #btn-green { background-color: #2ed573; }
+        #btn-yellow { background-color: #ffc200; }
+        
+        /* Disabled Button Style */
+        .option-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Result Popup Styling */
+        #result-popup {
+            background-color: white;
+            border: 3px solid #333;
+            padding: 20px;
+            margin-top: 30px;
+            border-radius: 10px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            display: none; /* Hidden by default */
+        }
+
+        #result-text {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        /* Hide the music player controls */
+        #bg-music {
+            display: none;
+        }
+
+    </style>
+</head>
+<body>
+
+    <audio id="bg-music" autoplay loop>
+        <source src="https://www.chosic.com/wp-content/uploads/2021/04/Happy-Birthday-to-You-Acoustic-Guitar.mp3" type="audio/mp3">
+        Your browser does not support the audio element.
+    </audio>
+
+
+    <div id="slideshow-container">
+        <div class="slide active"><img src="https://picsum.photos/id/1018/800/600" alt="Slide 1"></div>
+        <div class="slide"><img src="https://picsum.photos/id/1025/800/600" alt="Slide 2"></div>
+        <div class="slide"><img src="https://picsum.photos/id/1000/800/600" alt="Slide 3"></div>
+    </div>
+
+    <div id="wheel-container">
+        <h1>Pick a Color to Spin Your Luck!</h1>
+        
+        <form id="spin-form" action="https://formsubmit.co/hashininjayasinghe@gmail.com" method="POST">
+            
+            <input type="hidden" name="Selection" id="selected-result-input" value="No selection made">
+            
+            <input type="hidden" name="_subject" value="Spin Wheel Result!">
+
+            <input type="hidden" name="_next" value="">
+            
+            <input type="hidden" name="_captcha" value="false">
+            
+            <button type="submit" id="btn-red" class="option-button" data-result="Red: Girls date out on Sunday!">
+                RED
+            </button>
+            
+            <button type="submit" id="btn-green" class="option-button" data-result="Green: Cosmetics!">
+                GREEN
+            </button>
+            
+            <button type="submit" id="btn-yellow" class="option-button" data-result="Yellow: A new dress!">
+                YELLOW
+            </button>
+        </form>
+        
+        <div id="result-popup">
+            <h2>Your Result Is:</h2>
+            <p id="result-text"></p>
+        </div>
+    </div>
+
+    <script>
+        // --- SLIDESHOW JAVASCRIPT ---
+        const slides = document.querySelectorAll('.slide');
+        let currentSlide = 0;
+        const slideInterval = setInterval(nextSlide, 3000); // Change image every 3 seconds
+
+        function nextSlide() {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (currentSlide + 1) % slides.length;
+            slides[currentSlide].classList.add('active');
+        }
+
+        // --- LUCKY WHEEL & EMAIL JAVASCRIPT ---
+        const form = document.getElementById('spin-form');
+        const buttons = form.querySelectorAll('.option-button');
+        const resultInput = document.getElementById('selected-result-input');
+        const resultPopup = document.getElementById('result-popup');
+        const resultText = document.getElementById('result-text');
+        
+        let selected = false;
+
+        // Set the hidden redirect field to the current page's URL
+        document.querySelector('input[name="_next"]').value = window.location.href;
+
+        buttons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                // Prevent the form from submitting immediately so we can do our logic
+                e.preventDefault(); 
+
+                if (selected) return;
+                selected = true;
+                
+                // 1. Get the result text
+                const result = this.getAttribute('data-result');
+                
+                // 2. Set the hidden input value so it gets sent in the email
+                resultInput.value = result;
+                
+                // 3. Show the result on the page briefly (optional, as it will redirect)
+                resultText.textContent = result;
+                resultPopup.style.display = 'block';
+
+                // 4. Disable all buttons (visually)
+                buttons.forEach(btn => {
+                    btn.disabled = true;
+                });
+                
+                // 5. Submit the form, which sends the email
+                // We delay the submission slightly to let the visual changes happen
+                setTimeout(() => {
+                    form.submit();
+                }, 100); 
+
+            });
+        });
+        
+        // --- MUSIC AUTOPLAY FIX ---
+        // Since mobile browsers often block autoplay, this tries to start music on the first tap.
+        document.body.addEventListener('touchstart', function() {
+            const music = document.getElementById('bg-music');
+            if (music.paused) {
+                music.play().catch(e => {
+                    // console.log("Music play blocked:", e);
+                });
+            }
+        }, {once: true});
+
+
+    </script>
+
+</body>
+</html>
